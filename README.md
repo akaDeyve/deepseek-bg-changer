@@ -82,12 +82,19 @@ Dual-face plugin package:
 
 ## History
 
-- **v1.0** — static deployment package: default-on, restart-proof,
-  localStorage persistence, theme-aware built-in gradient, one-shot
-  installer.
+- **v1.1.1** — performance fix: `theme.overrideTokens()` publishes a snapshot
+  and **`publish()` emits `theme/change`**, so re-applying tokens from that
+  listener recursed (thousands of app-wide re-renders per settings change —
+  the "laggy settings menu"). The token layer is now only applied when it
+  actually changed, the `theme/change` listener only reacts to real
+  light/dark switches, and slider/color input debounces apply + persist into
+  one 60 ms idle window.
 - **v1.1** — accent color, fade-to-bottom dim, opt-in sidebar/message-box
   blur (learned from EsshUwU/dsh-theme), `external: ["react"]` manifest
   declaration, package-bundle patch file for the alternative install path.
+- **v1.0** — static deployment package: default-on, restart-proof,
+  localStorage persistence, theme-aware built-in gradient, one-shot
+  installer.
 - **v0 (legacy/dynamic)** — dynamic Cordis plugin, re-created per session via
   `cordis_define` / `cordis_run`, settings persisted host-side to
   `chat-bg.json`.
