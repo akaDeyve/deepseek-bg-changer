@@ -1,38 +1,77 @@
-# Chat Background plugin (dynamic Cordis)
+# deepseek-bg-changer
 
-A temporary, session-scoped Cordis plugin that tints the DeepSeek Harness web
-GUI chat area with a wallpaper and translucent UI surfaces.
+A permanent, **enabled-by-default** wallpaper plugin for the DeepSeek Harness
+(DSH) web GUI: it tints the chat area with a background image and makes the UI
+surfaces translucent.
 
-## Files
+Installed once, it survives DSH restarts — no session-scoped plugin rebuilds.
 
-- `host.js`   — Host half: `chat-bg://load` / `chat-bg://save` RPC that persists
-                settings to `<workspace>/chat-bg.json` via the `fs` service.
-- `client.js` — Client (browser) half: the settings page (Settings → Chat
-                Background) plus the wallpaper/translucency CSS.
+## Features
 
-## How to re-create it in a new session
+- **Default on.** Mounts as a static composition row (`chat-bg` in the
+  profile's `cordis.patch.yml`) and applies at page load.
+- **Built-in gradient.** Without a chosen image it renders a subtle gradient
+  that follows the active light/dark color scheme (listens to `theme/change`).
+- **Wallpaper** — image URL or local file (embedded as data URL), with
+  Cover / Stretch / Zoom-% fit, position presets or custom X/Y, and a
+  0–80 % dim layer.
+- **Translucent UI** — below 100 % surface opacity the theme tokens for the
+  base layer, sidebar, input, tips, selector, and chat bubbles become
+  translucent (`--dsw-alias-*` / `--dsw-specific-*` overrides), so the
+  wallpaper shows through the whole interface, sidebar included.
+- **Persistence** — settings live in the browser
+  (`localStorage["dsh.chat-background.settings"]`); they survive DSH
+  restarts without any host-side storage.
+- **Settings UI** — a **Chat Background** section in Settings (file pickers,
+  sliders, status line), registered through the `settings.section` slot.
 
-Dynamic Cordis plugins do **not** survive a process restart. In a fresh session,
-rebuild it from these files:
+## Repo layout
 
-1. `cordis_define` a **new** plugin — `kind: "new"`, `idPrefix: "chbg"` — with
-   `code.host` = the body of `host.js` and `code.client` = the body of
-   `client.js` (the `return { ... }` expressions, without the leading comments).
+```
+package.json        the dual-face package manifest (dsh.client declaration)
+lib/index.js        host half — intentional no-op (the row needs a host module)
+lib/client.js       browser half: wallpaper + token overrides + settings UI
+install.sh          one-shot installer (copies the package + adds the row)
+INSTALL.md          install / verify / uninstall guide
+legacy/dynamic/     the obsolete session-scoped variant (cordis_define era)
+```
 
-2. `cordis_run` the returned `pluginId` / `packageId` (mode `run`). Approve the
-   activation in the UI; the client activates asynchronously.
+## Install
 
-3. Open **Settings → Chat Background**.
+See **[INSTALL.md](INSTALL.md)** — one command with the script, or three
+manual steps. Short version:
 
-## Important notes
+```sh
+./install.sh      # copies package into $DSH_HOME/profiles/node_modules/
+                  # and adds the chat-bg row to profiles/web/cordis.patch.yml
+# restart the DSH web process, reload the page
+```
 
-- **Not a durable preset.** A dynamic plugin's code (especially a `code.client`
-  browser half) is not a loadable package `name` for a `cordis.yml` row, so it
-  cannot be "installed permanently" as a composition row. The only supported
-  persistence is re-`cordis_define`/`cordis_run` each session (step 2 above).
-- **No blur.** `backdrop-filter` (the only way to frost the UI panels
-  themselves) destabilizes the app's fixed-position settings modal regardless of
-  where it is applied, so blur was removed. The result is a sharp wallpaper +
-  translucent surfaces, which is fully stable.
-- **Settings path.** Stored at `chat-bg.json` in the session workspace
-  (`C:\Projects\Home` in the current session).
+## How it works
+
+Dual-face plugin package:
+
+1. **Host composition.** The row `- { id: chat-bg, name: dsh-chat-background }`
+   sits in `profiles/web/cordis.patch.yml`. The host Loader imports the
+   no-op `lib/index.js`; the client-module system scans the package's
+   `dsh.client` declaration (`platform: web`, injected after the slots/theme
+   providers) and serves the browser bundle at
+   `/plugins/??dsh-chat-background/client.js`.
+2. **Page load.** The boot graph (`window.__DSH_BOOT__`) carries the entry;
+   the browser Cordis loader activates the same composition row in the page.
+   The plugin then injects the wallpaper `<style>`, overrides the
+   `--dsw-*` theme tokens for translucency, and registers its settings
+   section.
+3. **Stability note.** No `backdrop-filter` blur: frosted panels destabilize
+   the app's fixed-position settings modal regardless of where the filter is
+   applied. The result is a sharp wallpaper + translucent surfaces, which is
+   fully stable.
+
+## History
+
+- **v1 (legacy/dynamic)** — dynamic Cordis plugin, re-created per session via
+  `cordis_define` / `cordis_run`, settings persisted host-side to
+  `chat-bg.json`.
+- **v2 (current)** — static deployment package: default-on, restart-proof,
+  localStorage persistence, theme-aware built-in gradient, one-shot
+  installer.
