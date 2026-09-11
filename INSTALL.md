@@ -48,6 +48,24 @@ Then restart the DSH web process and reload the browser page.
 > Tip: `dsh --profile web --dump-config` should print the row
 > (`# == .../cordis.patch.yml` → `- id: chat-bg / name: dsh-chat-background`).
 
+## Option C — package bundle (alternative)
+
+The package also carries its own patch (`cordis.patch.yml` via the
+`dsh.bundle.patch` manifest key). Declare it as a profile bundle instead of
+editing the profile patch file:
+
+```sh
+cd deepseek-bg-changer
+dsh plugin --profile web add "$(pwd)"     # installs into profile node_modules
+# add "dsh-chat-background" to dsh.profile.bundles in
+# $DSH_HOME/profiles/web/package.json
+```
+
+Then restart + reload. **Never run both paths at once:** the bundle patch AND
+a manual row in the profile's cordis.patch.yml would register the package
+twice — the client module scan rejects that ("resolves from multiple active
+Loader sources"). Pick exactly one.
+
 ## Verify
 
 - Boot graph: fetch the GUI URL (the token URL printed by `dsh web`) and look
@@ -63,8 +81,18 @@ Then restart the DSH web process and reload the browser page.
 - **Fit** — Cover (crop) / Stretch / Zoom %, **Position** — presets or custom
   X/Y.
 - **Dim (darken)** — 0–80% black layer over the image.
+- **Fade to bottom** — replaces the uniform dim with a vertical gradient that
+  goes fully dark toward the page bottom (background image only).
 - **Surface opacity %** — 20–100; below 100 the UI layers (incl. sidebar,
   input, bubbles) become translucent via theme-token overrides.
+- **Accent** — swatch row (presets, custom picker, × to reset); retints
+  primary/info buttons, brand color, and links with derived hover/dark
+  variants.
+- **Extend to sidebar** — with a background image: translucent elevated
+  buttons plus an adjustable `backdrop-filter` blur on the sidebar column
+  (0–30 px).
+- **Blur message box** — with a background image: adjustable blur on the
+  composer card (0–30 px).
 
 Storage: `localStorage["dsh.chat-background.settings"]` (per browser).
 

@@ -14,11 +14,22 @@ Installed once, it survives DSH restarts — no session-scoped plugin rebuilds.
   that follows the active light/dark color scheme (listens to `theme/change`).
 - **Wallpaper** — image URL or local file (embedded as data URL), with
   Cover / Stretch / Zoom-% fit, position presets or custom X/Y, and a
-  0–80 % dim layer.
+  0–80 % dim layer (uniform, or "fade to bottom" — a vertical gradient that
+  goes fully dark toward the page bottom).
 - **Translucent UI** — below 100 % surface opacity the theme tokens for the
   base layer, sidebar, input, tips, selector, and chat bubbles become
   translucent (`--dsw-alias-*` / `--dsw-specific-*` overrides), so the
   wallpaper shows through the whole interface, sidebar included.
+- **Accent color** — optional swatch row (presets + custom picker) that
+  retints the primary/info buttons, brand color, and links, with derived
+  hover/dark variants (`shade()` helpers adapted from
+  [EsshUwU/dsh-theme](https://github.com/EsshUwU/dsh-theme), MIT).
+- **Opt-in frosted extensions** — with a background image, "Extend to
+  sidebar" and "Blur message box" add adjustable `backdrop-filter` blur to
+  the narrow targets `[class*="sidebarCol"]` / `[data-composer-card]` plus
+  translucent elevated-button tokens. A blanket blur anywhere destabilizes
+  the app's fixed-position settings modal — scoped to these narrow targets
+  it is stable (each toggle ships its own cleanup).
 - **Persistence** — settings live in the browser
   (`localStorage["dsh.chat-background.settings"]`); they survive DSH
   restarts without any host-side storage.
@@ -28,11 +39,12 @@ Installed once, it survives DSH restarts — no session-scoped plugin rebuilds.
 ## Repo layout
 
 ```
-package.json        the dual-face package manifest (dsh.client declaration)
+package.json        the dual-face package manifest (dsh.client + dsh.bundle)
 lib/index.js        host half — intentional no-op (the row needs a host module)
 lib/client.js       browser half: wallpaper + token overrides + settings UI
+cordis.patch.yml    the package's own patch — used by the ALTERNATIVE bundle install
 install.sh          one-shot installer (copies the package + adds the row)
-INSTALL.md          install / verify / uninstall guide
+INSTALL.md          install / verify / uninstall guide (both paths)
 legacy/dynamic/     the obsolete session-scoped variant (cordis_define era)
 ```
 
@@ -62,16 +74,20 @@ Dual-face plugin package:
    The plugin then injects the wallpaper `<style>`, overrides the
    `--dsw-*` theme tokens for translucency, and registers its settings
    section.
-3. **Stability note.** No `backdrop-filter` blur: frosted panels destabilize
-   the app's fixed-position settings modal regardless of where the filter is
-   applied. The result is a sharp wallpaper + translucent surfaces, which is
-   fully stable.
+3. **Stability note.** No blanket `backdrop-filter`: frosted panels across the
+   whole UI destabilize the app's fixed-position settings modal. The opt-in
+   "Extend to sidebar" / "Blur message box" toggles scope the blur to two
+   narrow targets (`[class*="sidebarCol"]`, `[data-composer-card]`), which is
+   stable. The result is a sharp wallpaper + translucent surfaces.
 
 ## History
 
-- **v1 (legacy/dynamic)** — dynamic Cordis plugin, re-created per session via
-  `cordis_define` / `cordis_run`, settings persisted host-side to
-  `chat-bg.json`.
-- **v2 (current)** — static deployment package: default-on, restart-proof,
+- **v1.0** — static deployment package: default-on, restart-proof,
   localStorage persistence, theme-aware built-in gradient, one-shot
   installer.
+- **v1.1** — accent color, fade-to-bottom dim, opt-in sidebar/message-box
+  blur (learned from EsshUwU/dsh-theme), `external: ["react"]` manifest
+  declaration, package-bundle patch file for the alternative install path.
+- **v0 (legacy/dynamic)** — dynamic Cordis plugin, re-created per session via
+  `cordis_define` / `cordis_run`, settings persisted host-side to
+  `chat-bg.json`.
