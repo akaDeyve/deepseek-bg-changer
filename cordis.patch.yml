@@ -1,0 +1,19 @@
+# dsh-chat-background bundle patch — the ALTERNATIVE install path.
+#
+# This file is only honored when the package is declared as a profile bundle:
+# add "dsh-chat-background" to `dsh.profile.bundles` in the profile's
+# package.json (and have the package installed in the profile's node_modules,
+# e.g. via `dsh plugin --profile web add ./dsh-chat-background`). The tree then
+# applies this patch automatically — the profile's cordis.patch.yml needs NO
+# chat-bg row in that case.
+#
+# IMPORTANT: never run both install paths at once. The row below AND a manual
+# row in the profile patch file would register the same package twice, and the
+# client module scan rejects that ("resolves from multiple active Loader
+# sources"). Pick one path.
+#
+# Format note: the entry must be wrapped in `insert` — a bare `- name: x`
+# patch entry is skipped with "patch: id is required for non-insert patches".
+- insert:
+    - id: chat-bg
+      name: dsh-chat-background
