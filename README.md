@@ -1,22 +1,22 @@
 # deepseek-bg-changer
 
-Ein Plugin für die DeepSeek Harness (DSH) Web-Oberfläche, das den Chat-Hintergrund mit einem Bild oder Farbverlauf füllt und die UI-Elemente durchscheinend macht. Einmal installiert, bleibt es aktiv – auch nach einem Neustart.
+A permanent wallpaper plugin for the DeepSeek Harness (DSH) web GUI. It adds a background image or gradient to the chat area and makes the UI surfaces translucent. Once installed, it stays active across DSH restarts.
 
 ## Features
 
-- **Standardmäßig aktiv** – Wird automatisch geladen und angewendet
-- **Farbverlauf oder Hintergrundbild** – Bild-URL oder lokale Datei, mit verschiedenen Anpassungsoptionen (Cover, Stretch, Zoom) und Positionierung
-- **Abdunkeln** – 0–80 % dunkle Überlagerung, optional als Verlauf nach unten
-- **Durchscheinende UI** – Seitenleiste, Chat-Blasen, Eingabefeld und andere Elemente werden bei <100 % Opazität durchsichtig
-- **Akzentfarbe** – Farbauswahl für Buttons, Links und Markierungen
-- **Optionale Unschärfe** – Seitenleiste und Eingabefeld können mit einstellbarem Unschärfe-Effekt versehen werden
-- **Einstellungen** – Werden im Browser gespeichert und überleben DSH-Neustarts
+- **Enabled by default** – Loads automatically on page load
+- **Background image or gradient** – Image URL or local file, with Cover/Stretch/Zoom fit and custom positioning
+- **Darken overlay** – 0–80% dim layer, with optional fade-to-bottom gradient
+- **Translucent UI** – Sidebar, chat bubbles, input field, and other elements become transparent below 100% opacity
+- **Accent color** – Color picker for buttons, links, and highlights
+- **Optional blur** – Adjustable backdrop blur for sidebar and message box
+- **Persistent settings** – Saved in browser localStorage, survives DSH restarts
 
 ## Installation
 
-Es gibt zwei gängige Methoden, das Plugin zu installieren:
+Two recommended methods to install the plugin:
 
-### Methode 1: Einfache Installation mit Skript
+### Method 1: One-shot script
 
 ```sh
 git clone https://github.com/akaDeyve/deepseek-bg-changer.git
@@ -25,11 +25,11 @@ chmod +x install.sh
 ./install.sh
 ```
 
-Danach DSH neu starten und die Seite neu laden.
+Then restart the DSH web process and reload the page.
 
-### Methode 2: Manuelle Installation
+### Method 2: Manual install
 
-1. Kopiere das Plugin in das DSH-Profil:
+1. Copy the plugin to your DSH profile:
 
    ```sh
    DSH_HOME="${DSH_HOME:-$HOME/.dsh}"
@@ -38,7 +38,7 @@ Danach DSH neu starten und die Seite neu laden.
    cp lib/index.js lib/client.js "$DSH_HOME/profiles/node_modules/dsh-chat-background/lib/"
    ```
 
-2. Füge die folgende Zeile zu `$DSH_HOME/profiles/web/cordis.patch.yml` hinzu:
+2. Add the row to `$DSH_HOME/profiles/web/cordis.patch.yml`:
 
    ```yaml
    - insert:
@@ -46,46 +46,45 @@ Danach DSH neu starten und die Seite neu laden.
          name: dsh-chat-background
    ```
 
-3. DSH neu starten und die Seite neu laden.
+3. Restart DSH and reload the page.
 
-
-## Deinstallation
+## Uninstall
 
 ```sh
 rm -rf "$DSH_HOME/profiles/node_modules/dsh-chat-background"
 ```
 
-Und entferne den `chat-bg` Eintrag aus `$DSH_HOME/profiles/web/cordis.patch.yml`.
+And remove the `chat-bg` entry from `$DSH_HOME/profiles/web/cordis.patch.yml`.
 
-## Einstellungen
+## Settings
 
-Im DSH unter **Settings → Chat Background** findest du alle Optionen:
+In DSH, go to **Settings → Chat Background** for all options:
 
-- **Aktiviert** – Plugin ein-/ausschalten
-- **Bildquelle** – URL oder lokale Datei
-- **Anpassung** – Cover, Stretch oder Zoom
-- **Position** – Vordefiniert oder benutzerdefiniert
-- **Abdunkeln** – 0–80 % dunkle Überlagerung
-- **Verlauf nach unten** – Dunkler Verlauf am unteren Bildschirmrand
-- **UI-Opazität** – 20–100 %, steuert die Durchsichtigkeit der UI
-- **Akzentfarbe** – Farbe für Buttons und Links
-- **Unschärfe für Seitenleiste** – 0–30 px
-- **Unschärfe für Eingabefeld** – 0–30 px
+- **Enabled** – Toggle plugin on/off
+- **Image source** – URL or local file
+- **Fit** – Cover, Stretch, or Zoom
+- **Position** – Presets or custom X/Y
+- **Darken** – 0–80% overlay
+- **Fade to bottom** – Gradient that goes dark toward page bottom
+- **UI opacity** – 20–100%, controls transparency of UI elements
+- **Accent color** – Color for buttons and links
+- **Sidebar blur** – 0–30px backdrop blur
+- **Message box blur** – 0–30px backdrop blur
 
-Die Einstellungen werden im Browser gespeichert (`localStorage`).
+Settings are stored in browser `localStorage`.
 
-## Wie es funktioniert
+## How it works
 
-Das Plugin besteht aus zwei Teilen:
+The plugin has two parts:
 
-- **Host-Seite** (`lib/index.js`) – Ein einfacher Platzhalter, der für die Registrierung benötigt wird
-- **Client-Seite** (`lib/client.js`) – Wird im Browser ausgeführt und fügt den Hintergrund sowie die Einstellungen hinzu
+- **Host side** (`lib/index.js`) – A simple placeholder required for registration
+- **Client side** (`lib/client.js`) – Runs in the browser, adds the background and settings
 
-Durch die Eintragung in `cordis.patch.yml` wird das Plugin automatisch geladen. Im Browser wendet es dann den Hintergrund an und überschreibt die Theme-Farben, um die UI durchscheinend zu machen.
+Registration in `cordis.patch.yml` loads the plugin automatically. In the browser, it applies the background and overrides theme colors to make the UI translucent.
 
-## Versionsgeschichte
+## Version history
 
-- **v1.1.1** – Performance-Fix: Theme-Tokens werden nur noch bei tatsächlichen Änderungen aktualisiert
-- **v1.1** – Akzentfarbe, Verlauf nach unten, optionale Unschärfe für Seitenleiste und Eingabefeld
-- **v1.0** – Statisches Plugin: standardmäßig aktiv, überlebt Neustarts, Browser-Speicher für Einstellungen
-- **v0 (legacy)** – Dynamisches Plugin (veraltet), musste bei jedem Start neu erstellt werden
+- **v1.1.1** – Performance fix: theme tokens only update on actual changes
+- **v1.1** – Accent color, fade-to-bottom, optional blur for sidebar and message box
+- **v1.0** – Static plugin: enabled by default, survives restarts, browser storage for settings
+- **v0 (legacy)** – Dynamic plugin (obsolete), had to be recreated on each start
