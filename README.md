@@ -2,6 +2,8 @@
 
 A permanent wallpaper plugin for the DeepSeek Harness (DSH) web GUI. It adds a background image or gradient to the chat area and makes the UI surfaces translucent. Once installed, it stays active across DSH restarts.
 
+**License:** [MIT](LICENSE)
+
 ## Features
 
 - **Enabled by default** – Loads automatically on page load
